@@ -83,6 +83,19 @@
         const gridSize = 20;
         const explosionParticles = [];
         const tileCount = canvas.width / gridSize;
+        const deathMessages = [
+            "Fuck!",
+            "Shit!",
+            "Damn it!",
+            "Goddammit!",
+            "Bullshit!",
+            "Holy shit!",
+            "Fuck my life!",
+            "You suck!",
+            "What the fuck?!"
+        ];
+        let deathMessage = "";
+        let deathMessageFrames = 0;
         let score = 0;
         
         let snake = [
@@ -146,12 +159,16 @@
             
             // Check wall collision
             if (head.x < 0 || head.x >= tileCount || head.y < 0 || head.y >= tileCount) {
+                deathMessage = deathMessages[Math.floor(Math.random() * deathMessages.length)];
+                deathMessageFrames = 60;
                 resetGame();
             }
             
             // Check self collision
             for (let i = 1; i < snake.length; i++) {
                 if (head.x === snake[i].x && head.y === snake[i].y) {
+                    deathMessage = deathMessages[Math.floor(Math.random() * deathMessages.length)];
+                    deathMessageFrames = 60;
                     resetGame();
                 }
             }
@@ -188,6 +205,17 @@
             
             // Reset alpha after drawing particles
             ctx.globalAlpha = 1.0;
+            
+            // Draw death message if active
+            if (deathMessageFrames > 0) {
+                ctx.font = '20px Arial';
+                ctx.fillStyle = 'white';
+                ctx.strokeStyle = 'black';
+                ctx.lineWidth = 2;
+                ctx.strokeText(deathMessage, snake[0].x * gridSize, snake[0].y * gridSize - 20);
+                ctx.fillText(deathMessage, snake[0].x * gridSize, snake[0].y * gridSize - 20);
+                deathMessageFrames--;
+            }
             
             // Draw snake
             ctx.fillStyle = 'green';
