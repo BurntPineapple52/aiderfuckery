@@ -8,6 +8,8 @@
             flex-direction: column;
             align-items: center;
             font-family: Arial, sans-serif;
+            background-color: #111;
+            color: white;
         }
         canvas {
             border: 1px solid black;
@@ -21,15 +23,23 @@
 </head>
 <body>
     <h1>Snake Game</h1>
-    <div class="score">Score: <span id="score">0</span></div>
+    <div class="score">
+        Score: <span id="score">0</span> | 
+        High Score: <span id="highScore">0</span>
+    </div>
     <canvas id="gameCanvas" width="400" height="400"></canvas>
 
     <script>
         const canvas = document.getElementById('gameCanvas');
         const ctx = canvas.getContext('2d');
         const scoreElement = document.getElementById('score');
+        const highScoreElement = document.getElementById('highScore');
+        
+        let highScore = localStorage.getItem('snakeHighScore') || 0;
+        highScoreElement.textContent = highScore;
         
         const gridSize = 20;
+        const explosionParticles = [];
         const tileCount = canvas.width / gridSize;
         let score = 0;
         
@@ -58,6 +68,25 @@
             if (head.x === food.x && head.y === food.y) {
                 score++;
                 scoreElement.textContent = score;
+                
+                if (score > highScore) {
+                    highScore = score;
+                    highScoreElement.textContent = highScore;
+                    localStorage.setItem('snakeHighScore', highScore);
+                }
+                
+                // Create explosion particles
+                for (let i = 0; i < 20; i++) {
+                    explosionParticles.push({
+                        x: food.x * gridSize,
+                        y: food.y * gridSize,
+                        vx: (Math.random() - 0.5) * 8,
+                        vy: (Math.random() - 0.5) * 8,
+                        size: Math.random() * 10 + 5,
+                        color: `hsl(${Math.random() * 60 + 10}, 100%, 50%)`
+                    });
+                }
+                
                 food = {
                     x: Math.floor(Math.random() * tileCount),
                     y: Math.floor(Math.random() * tileCount)
@@ -79,8 +108,31 @@
             }
             
             // Draw food
+            // Draw food with a nice effect
             ctx.fillStyle = 'red';
-            ctx.fillRect(food.x * gridSize, food.y * gridSize, gridSize, gridSize);
+            ctx.beginPath();
+            ctx.arc(
+                food.x * gridSize + gridSize/2,
+                food.y * gridSize + gridSize/2,
+                gridSize/2, 0, Math.PI * 2
+            );
+            ctx.fill();
+            
+            // Draw explosion particles if any
+            for (let i = 0; i < explosionParticles.length; i++) {
+                const p = explosionParticles[i];
+                ctx.fillStyle = p.color;
+                ctx.fillRect(p.x, p.y, p.size, p.size);
+                
+                p.x += p.vx;
+                p.y += p.vy;
+                p.size *= 0.95;
+                
+                if (p.size < 0.5) {
+                    explosionParticles.splice(i, 1);
+                    i--;
+                }
+            }
             
             // Draw snake
             ctx.fillStyle = 'green';
@@ -92,6 +144,7 @@
         function resetGame() {
             score = 0;
             scoreElement.textContent = score;
+            explosionParticles.length = 0;
             snake = [{x: 10, y: 10}];
             xVelocity = 0;
             yVelocity = 0;
