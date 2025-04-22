@@ -11,6 +11,32 @@
             background-color: #111;
             color: white;
         }
+        .screen {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+        .hidden {
+            display: none;
+        }
+        .menu-button {
+            padding: 10px 20px;
+            margin: 10px;
+            font-size: 18px;
+            background-color: #4CAF50;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+        }
+        .menu-button:hover {
+            background-color: #45a049;
+        }
+        .instructions {
+            text-align: center;
+            max-width: 300px;
+            margin: 20px;
+        }
         canvas {
             border: 1px solid black;
             background-color: #f0f0f0;
@@ -22,12 +48,28 @@
     </style>
 </head>
 <body>
-    <h1>Snake Game</h1>
-    <div class="score">
-        Score: <span id="score">0</span> | 
-        High Score: <span id="highScore">0</span>
+    <div id="menuScreen" class="screen">
+        <h1>Snake Game</h1>
+        <button id="startButton" class="menu-button">Start Game</button>
+        <button id="howToButton" class="menu-button">How To Play</button>
+        <div id="instructions" class="instructions hidden">
+            <h3>How To Play</h3>
+            <p>Use arrow keys to control the snake</p>
+            <p>Eat the red food to grow</p>
+            <p>Avoid hitting walls or yourself</p>
+            <button id="backButton" class="menu-button">Back</button>
+        </div>
     </div>
-    <canvas id="gameCanvas" width="400" height="400"></canvas>
+    
+    <div id="gameScreen" class="screen hidden">
+        <h1>Snake Game</h1>
+        <div class="score">
+            Score: <span id="score">0</span> | 
+            High Score: <span id="highScore">0</span>
+        </div>
+        <canvas id="gameCanvas" width="400" height="400"></canvas>
+        <button id="menuButton" class="menu-button">Menu</button>
+    </div>
 
     <script>
         const canvas = document.getElementById('gameCanvas');
@@ -184,7 +226,28 @@
             }
         });
         
-        setInterval(gameLoop, 100);
+        let gameInterval;
+        
+        document.getElementById('startButton').addEventListener('click', () => {
+            document.getElementById('menuScreen').classList.add('hidden');
+            document.getElementById('gameScreen').classList.remove('hidden');
+            resetGame();
+            gameInterval = setInterval(gameLoop, 100);
+        });
+        
+        document.getElementById('menuButton').addEventListener('click', () => {
+            clearInterval(gameInterval);
+            document.getElementById('menuScreen').classList.remove('hidden');
+            document.getElementById('gameScreen').classList.add('hidden');
+        });
+        
+        document.getElementById('howToButton').addEventListener('click', () => {
+            document.getElementById('instructions').classList.remove('hidden');
+        });
+        
+        document.getElementById('backButton').addEventListener('click', () => {
+            document.getElementById('instructions').classList.add('hidden');
+        });
     </script>
 </body>
 </html>
