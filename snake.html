@@ -171,12 +171,12 @@
                     scoreElement.textContent = score;
                     
                     if (score > highScore) {
-                    highScore = score;
-                    highScoreElement.textContent = highScore;
-                    localStorage.setItem('snakeHighScore', highScore);
+                        highScore = score;
+                        highScoreElement.textContent = highScore;
+                        localStorage.setItem('snakeHighScore', highScore);
                     }
                 
-                // Create explosion based on score level
+                    // Create explosion based on score level
                 const particleCount = 15 + Math.min(30, Math.floor(score/5));
                 const baseColor = score > 50 ? 280 : score > 20 ? 200 : 10; // Change hue based on score
                 
@@ -199,10 +199,9 @@
                     x: Math.floor(Math.random() * tileCount),
                     y: Math.floor(Math.random() * tileCount)
                 };
-            } 
-            //else { 
-            //    snake.pop();
-            //}
+            } else {
+                snake.pop();
+            }
             
             // Check wall collision
             if (head.x < 0 || head.x >= tileCount || head.y < 0 || head.y >= tileCount) {
