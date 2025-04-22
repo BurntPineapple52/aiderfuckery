@@ -37,6 +37,15 @@
             max-width: 300px;
             margin: 20px;
         }
+        .swallowing-food {
+            position: absolute;
+            width: 20px;
+            height: 20px;
+            background-color: red;
+            border-radius: 50%;
+            transition: all 0.1s linear;
+            z-index: 10;
+        }
         canvas {
             border: 1px solid black;
             background-color: #f0f0f0;
@@ -106,6 +115,9 @@
             x: Math.floor(Math.random() * tileCount),
             y: Math.floor(Math.random() * tileCount)
         };
+        let swallowingFood = null;
+        let swallowPath = [];
+        let swallowIndex = 0;
         
         let xVelocity = 0;
         let yVelocity = 0;
@@ -120,11 +132,45 @@
             snake.unshift(head);
             
             // Check if snake ate food
-            if (head.x === food.x && head.y === food.y) {
-                score++;
-                scoreElement.textContent = score;
+            if (head.x === food.x && head.y === food.y && !swallowingFood) {
+                swallowingFood = {
+                    x: food.x * gridSize,
+                    y: food.y * gridSize
+                };
+                swallowPath = snake.map(segment => ({
+                    x: segment.x * gridSize,
+                    y: segment.y * gridSize
+                }));
+                swallowIndex = 0;
                 
-                if (score > highScore) {
+                // Create food element for animation
+                const foodElement = document.createElement('div');
+                foodElement.className = 'swallowing-food';
+                foodElement.style.left = `${food.x * gridSize}px`;
+                foodElement.style.top = `${food.y * gridSize}px`;
+                document.body.appendChild(foodElement);
+                swallowingFood.element = foodElement;
+                
+                food = {
+                    x: Math.floor(Math.random() * tileCount),
+                    y: Math.floor(Math.random() * tileCount)
+                };
+            }
+            
+            // Handle swallowing animation
+            if (swallowingFood) {
+                if (swallowIndex < swallowPath.length) {
+                    swallowingFood.element.style.left = `${swallowPath[swallowIndex].x}px`;
+                    swallowingFood.element.style.top = `${swallowPath[swallowIndex].y}px`;
+                    swallowIndex++;
+                } else {
+                    // Animation complete - grow snake and clean up
+                    document.body.removeChild(swallowingFood.element);
+                    swallowingFood = null;
+                    score++;
+                    scoreElement.textContent = score;
+                    
+                    if (score > highScore) {
                     highScore = score;
                     highScoreElement.textContent = highScore;
                     localStorage.setItem('snakeHighScore', highScore);
@@ -228,6 +274,10 @@
             score = 0;
             scoreElement.textContent = score;
             explosionParticles.length = 0;
+            if (swallowingFood) {
+                document.body.removeChild(swallowingFood.element);
+                swallowingFood = null;
+            }
             snake = [{x: 10, y: 10}];
             xVelocity = 0;
             yVelocity = 0;
